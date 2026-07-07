@@ -210,3 +210,10 @@
   opacity: 0.7;
 }
 
+.burst-heart {
+  position: absolute;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
+}
+
