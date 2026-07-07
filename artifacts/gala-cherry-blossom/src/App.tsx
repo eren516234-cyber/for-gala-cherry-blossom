@@ -23,7 +23,8 @@ function spawnBurst(container: HTMLElement, x: number, y: number, isHeart = fals
       el.innerHTML = ["♥", "♡", "❤"][Math.floor(Math.random() * 3)];
       const size = Math.random() * 18 + 12;
       const hue = Math.floor(Math.random() * 40 + 330);
-      el.style.cssText = `position:absolute;font-size:${size}px;color:hsl(${hue},80%,65%);left:${x}px;top:${y}px;pointer-events:none;z-index:9999;text-shadow:0 0 8px rgba(255,100,150,0.6);`;
+      // Use fixed positioning so coordinates match viewport regardless of scroll
+      el.style.cssText = `position:fixed;font-size:${size}px;color:hsl(${hue},80%,65%);left:${x}px;top:${y}px;pointer-events:none;z-index:9999;text-shadow:0 0 8px rgba(255,100,150,0.6);`;
     } else {
       el.className = "petal burst-petal";
       const size = Math.random() * 8 + 6;
@@ -102,8 +103,9 @@ export default function App() {
       const p = totalScrollable > 0 ? scrolled / totalScrollable : 0;
       progress.set(Math.min(1, Math.max(0, p)));
     };
-    function raf(time: number) { lenis.raf(time); updateProgress(); requestAnimationFrame(raf); }
-    const rafId = requestAnimationFrame(raf);
+    let rafId: number;
+    function raf(time: number) { lenis.raf(time); updateProgress(); rafId = requestAnimationFrame(raf); }
+    rafId = requestAnimationFrame(raf);
     return () => { cancelAnimationFrame(rafId); lenis.destroy(); };
   }, [progress]);
 
@@ -199,7 +201,8 @@ export default function App() {
     if (!container) return;
     const petalCount = window.innerWidth < 768 ? 15 : 40;
     const petals: HTMLDivElement[] = [];
-    const rafIds: number[] = [];
+    // One RAF id per petal — never accumulate ids inside the loop
+    const petalRafIds: number[] = [];
     for (let i = 0; i < petalCount; i++) {
       const petal = document.createElement("div");
       petal.className = "petal";
@@ -215,6 +218,7 @@ export default function App() {
       let angle = Math.random() * Math.PI * 2;
       let y = parseFloat(petal.style.top);
       let x = parseFloat(petal.style.left);
+      const idx = i;
       const animatePetal = () => {
         angle += 0.02; y += speed; x += Math.sin(angle) * sway * 0.5;
         if (y > window.innerHeight + 20) { y = -20; x = Math.random() * window.innerWidth; }
@@ -222,15 +226,16 @@ export default function App() {
         if (x < -20) x = window.innerWidth + 20;
         petal.style.top = y + "px"; petal.style.left = x + "px";
         petal.style.transform = `rotate(${angle * 20}deg)`;
-        rafIds.push(requestAnimationFrame(animatePetal));
+        // Overwrite the slot — never grow the array
+        petalRafIds[idx] = requestAnimationFrame(animatePetal);
       };
-      rafIds.push(requestAnimationFrame(animatePetal));
+      petalRafIds[idx] = requestAnimationFrame(animatePetal);
     }
     const handlePointer = (e: PointerEvent) => spawnBurst(container, e.clientX, e.clientY);
     window.addEventListener("pointerdown", handlePointer);
     return () => {
       window.removeEventListener("pointerdown", handlePointer);
-      rafIds.forEach((id) => cancelAnimationFrame(id));
+      petalRafIds.forEach((id) => cancelAnimationFrame(id));
       petals.forEach((p) => p.remove());
     };
   }, [isLoaded]);
@@ -242,7 +247,7 @@ export default function App() {
     if (ytIframeRef.current?.contentWindow) {
       ytIframeRef.current.contentWindow.postMessage(
         JSON.stringify({ event: "command", func: newMuted ? "muteVideo" : "unMuteVideo", args: [] }),
-        "*"
+        "https://www.youtube.com"
       );
     }
   }, [isMuted]);
@@ -565,10 +570,14 @@ function EnvelopeSection() {
       <div ref={heartContainerRef} className="relative flex flex-col items-center">
         {/* Envelope shell */}
         <motion.div
-          className="relative cursor-pointer select-none"
+          role="button"
+          tabIndex={0}
+          aria-label="Open letter"
+          className="relative cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d28a95]"
           style={{ width: 280, height: 200, perspective: "1200px" }}
           whileHover={!opened ? { scale: 1.04, filter: "drop-shadow(0 0 30px rgba(210,138,149,0.5))" } : {}}
           onClick={handleOpen}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpen(); } }}
         >
           {/* Body */}
           <div
