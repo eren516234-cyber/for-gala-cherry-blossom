@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&family=Caveat:wght@400;500;600;700&family=Kalam:wght@300;400;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --font-sans: 'Cormorant Garamond', serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-cursive: 'Great Vibes', cursive;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 34 30% 96%; /* warm paper white */
+  --foreground: 20 20% 20%; /* soft dark brown */
+  --border: 34 20% 86%;
+  --input: 34 20% 86%;
+  --ring: 20 20% 20%;
+
+  --card: 34 30% 98%;
+  --card-foreground: 20 20% 20%;
+  --card-border: 34 20% 86%;
+
+  --popover: 34 30% 98%;
+  --popover-foreground: 20 20% 20%;
+  --popover-border: 34 20% 86%;
+
+  --primary: 345 50% 60%; /* soft sakura pink */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 34 20% 90%;
+  --secondary-foreground: 20 20% 20%;
+
+  --muted: 34 20% 90%;
+  --muted-foreground: 20 10% 40%;
+
+  --accent: 345 30% 80%;
+  --accent-foreground: 20 20% 20%;
+
+  --destructive: 0 50% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 20 20% 10%;
+  --foreground: 34 30% 96%;
+  --border: 20 20% 20%;
+  --input: 20 20% 20%;
+  --ring: 34 30% 96%;
+
+  --card: 20 20% 12%;
+  --card-foreground: 34 30% 96%;
+  --card-border: 20 20% 20%;
+
+  --popover: 20 20% 12%;
+  --popover-foreground: 34 30% 96%;
+  --popover-border: 20 20% 20%;
+
+  --primary: 345 40% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 20 20% 15%;
+  --secondary-foreground: 34 30% 96%;
+
+  --muted: 20 20% 15%;
+  --muted-foreground: 34 20% 70%;
+
+  --accent: 345 30% 30%;
+  --accent-foreground: 34 30% 96%;
+
+  --destructive: 0 50% 50%;
+  --destructive-foreground: 0 0% 100%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.petal {
+  position: absolute;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 183, 197, 0.8), rgba(255, 105, 145, 0.4));
+  border-radius: 10px 0 10px 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.sticky-note {
+  position: relative;
+  padding: 1.5rem 1.5rem 1.25rem;
+  background:
+    repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 27px, rgba(60,45,35,0.06) 28px),
+    linear-gradient(135deg, #fffcf2 0%, #fdf6e3 100%);
+  box-shadow:
+    0 12px 24px -8px rgba(0,0,0,0.35),
+    0 2px 6px rgba(0,0,0,0.15),
+    inset 0 0 0 1px rgba(180,150,100,0.15);
+  border-radius: 3px 14px 3px 14px / 14px 3px 14px 3px;
+  clip-path: polygon(
+    1% 3%, 22% 0%, 48% 2%, 76% 0%, 99% 4%,
+    100% 24%, 98% 52%, 100% 78%, 99% 98%,
+    74% 100%, 50% 97%, 24% 100%, 0% 96%,
+    2% 70%, 0% 45%, 2% 20%
+  );
+}
+
+.washi-tape {
+  position: absolute;
+  top: -14px;
+  width: 56px;
+  height: 26px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(210, 138, 149, 0.55),
+    rgba(210, 138, 149, 0.55) 6px,
+    rgba(233, 178, 186, 0.55) 6px,
+    rgba(233, 178, 186, 0.55) 12px
+  );
+  opacity: 0.85;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.washi-tape-left {
+  left: 14px;
+  transform: rotate(-8deg);
+}
+
+.washi-tape-right {
+  right: 14px;
+  transform: rotate(8deg);
+}
+
+.doodle-heart {
+  position: absolute;
+  bottom: -8px;
+  right: -6px;
+  transform: rotate(12deg);
+  opacity: 0.85;
+}
+
+.doodle-letter-card {
+  position: relative;
+  padding: 2.5rem 2.5rem 2rem;
+  background:
+    repeating-linear-gradient(rgba(0,0,0,0) 0px, rgba(0,0,0,0) 31px, rgba(60,45,35,0.07) 32px),
+    linear-gradient(150deg, #fffef9 0%, #fdf8ee 100%);
+  box-shadow:
+    0 24px 60px -12px rgba(0,0,0,0.5),
+    0 4px 12px rgba(0,0,0,0.2),
+    inset 0 0 0 1px rgba(180,150,100,0.18);
+  border-radius: 4px 18px 4px 18px / 18px 4px 18px 4px;
+  clip-path: polygon(
+    0% 2%, 20% 0%, 50% 1.5%, 80% 0%, 100% 3%,
+    99% 25%, 100% 55%, 99% 80%, 100% 98%,
+    75% 100%, 45% 98%, 20% 100%, 0% 97%,
+    1% 72%, 0% 45%, 1% 20%
+  );
+}
+
+.doodle-corner-star {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  opacity: 0.7;
+}
+
