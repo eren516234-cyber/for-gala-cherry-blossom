@@ -1,0 +1,1 @@
+- [Scroll-scrubbed image-sequence sites](image-sequence-scrollytelling.md) — building an "Apple product page" style cinematic scroll site from a provided frame sequence (e.g. a zip of PNG frames).

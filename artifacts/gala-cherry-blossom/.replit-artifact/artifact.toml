@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "For Gala"
+version = "1.0.0"
+id = "artifacts/gala-cherry-blossom"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19680
+
+[services.development]
+run = "pnpm --filter @workspace/gala-cherry-blossom run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/gala-cherry-blossom", "run", "build" ]
+publicDir = "artifacts/gala-cherry-blossom/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19680"
+BASE_PATH = "/"
