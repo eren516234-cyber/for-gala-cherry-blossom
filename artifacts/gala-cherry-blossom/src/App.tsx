@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 import Lenis from "lenis";
 
 const TOTAL_FRAMES = 192;
 const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, "");
 const SCROLL_HEIGHT_VH = 2600;
-const YT_VIDEO_ID = "mihXUwMb-FY";
 
 function padFrame(index: number) {
   return index.toString().padStart(5, "0");
@@ -77,8 +76,6 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>(new Array(TOTAL_FRAMES));
-  const [isMuted, setIsMuted] = useState(true);
-  const ytIframeRef = useRef<HTMLIFrameElement>(null);
 
   const progress = useMotionValue(0);
   const smoothProgress = useSpring(progress, { stiffness: 120, damping: 24, mass: 0.5, restDelta: 0.0005 });
@@ -240,18 +237,6 @@ export default function App() {
     };
   }, [isLoaded]);
 
-  // YouTube mute/unmute via postMessage
-  const toggleMute = useCallback(() => {
-    const newMuted = !isMuted;
-    setIsMuted(newMuted);
-    if (ytIframeRef.current?.contentWindow) {
-      ytIframeRef.current.contentWindow.postMessage(
-        JSON.stringify({ event: "command", func: newMuted ? "muteVideo" : "unMuteVideo", args: [] }),
-        "https://www.youtube.com"
-      );
-    }
-  }, [isMuted]);
-
   if (!isLoaded) {
     return (
       <div className="fixed inset-0 bg-[#fdfaf6] flex flex-col items-center justify-center z-50">
@@ -272,64 +257,10 @@ export default function App() {
 
   return (
     <div className="bg-[#1a1817]">
-      {/* Hidden YouTube iframe — muted by default, unmuted on user click */}
-      <iframe
-        ref={ytIframeRef}
-        className="hidden"
-        src={`https://www.youtube.com/embed/${YT_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YT_VIDEO_ID}&enablejsapi=1&controls=0`}
-        allow="autoplay; encrypted-media"
-        title="67 music"
-      />
-
       {/* Fixed HUD */}
       <div className="fixed inset-0 pointer-events-none z-40">
         {/* Progress bar */}
         <motion.div className="absolute top-0 left-0 right-0 h-1 bg-white/20 origin-left" style={{ scaleX: smoothProgress }} />
-
-        {/* Music player widget */}
-        <div className="absolute top-5 right-5 pointer-events-auto flex flex-col items-end gap-2">
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1, duration: 0.8 }}
-            className="flex items-center gap-2 bg-black/40 backdrop-blur-md border border-white/15 rounded-full px-3 py-1.5"
-          >
-            {/* Animated sound bars */}
-            <div className="flex items-end gap-[2px] h-4 w-5">
-              {[0.4, 1, 0.6, 0.9, 0.5].map((h, i) => (
-                <motion.div
-                  key={i}
-                  className={`w-[3px] rounded-sm ${isMuted ? "bg-white/30" : "bg-[#f2a0b0]"}`}
-                  animate={isMuted ? { scaleY: 0.3 } : { scaleY: [h, 1, h * 0.6, 0.9, h] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1, ease: "easeInOut" }}
-                  style={{ height: "100%", transformOrigin: "bottom" }}
-                />
-              ))}
-            </div>
-            <span className="text-[10px] text-white/60 font-sans tracking-widest uppercase">67</span>
-            <button
-              onClick={toggleMute}
-              className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-              aria-label={isMuted ? "Play music" : "Mute music"}
-            >
-              {isMuted ? (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-              ) : (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-              )}
-            </button>
-          </motion.div>
-          <AnimatePresence>
-            {!isMuted && (
-              <motion.p
-                initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                className="text-[10px] text-white/40 font-sans tracking-widest italic pr-1"
-              >
-                ♪ 67 — Six Seven Dance
-              </motion.p>
-            )}
-          </AnimatePresence>
-        </div>
 
         {/* Scroll hint */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
@@ -348,9 +279,7 @@ export default function App() {
         </div>
       </div>
 
-      <Kid67Section />
       <EnvelopeSection />
-      <MusicSection />
     </div>
   );
 }
@@ -463,34 +392,6 @@ function ChapterTitle({ progress, start, end, roman, title }: { progress: any; s
       <span className="w-16 h-px bg-white/30 mb-4" />
       <h2 className="font-['Caveat'] text-5xl md:text-7xl text-white drop-shadow-lg">{title}</h2>
     </motion.div>
-  );
-}
-
-// ─── Kid 67 Section ───────────────────────────────────────────────────────────
-function Kid67Section() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start 0.8", "start 0.1"] });
-  const smooth = useSpring(scrollYProgress, { stiffness: 80, damping: 20, mass: 0.5 });
-  const figureOpacity = useTransform(smooth, [0, 0.3], [0, 1]);
-  const figureScale = useTransform(smooth, [0, 0.3], [0.6, 1]);
-  return (
-    <div ref={sectionRef} className="relative bg-black flex items-center justify-center overflow-hidden" style={{ height: "100vh" }}>
-      <motion.div style={{ opacity: figureOpacity, scale: figureScale }} className="relative flex flex-col items-center justify-center">
-        <motion.img
-          src={`${BASE_URL}/67-kid.png`} alt="67" className="w-64 md:w-80 select-none"
-          style={{ filter: "drop-shadow(0 0 40px rgba(255,0,0,0.25))" }}
-          animate={{ rotate: [-2, -12, 12, 0, -2], y: [0, -18, -18, 8, 0] }}
-          transition={{ duration: 2.4, times: [0, 0.28, 0.56, 0.8, 1], repeat: Infinity, repeatDelay: 0.8, ease: "easeInOut" }}
-        />
-        <motion.p
-          className="mt-4 font-['Caveat'] text-5xl md:text-6xl text-white tracking-widest drop-shadow-lg"
-          animate={{ opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-        >
-          6 7
-        </motion.p>
-      </motion.div>
-    </div>
   );
 }
 
@@ -693,94 +594,6 @@ function EnvelopeSection() {
         </AnimatePresence>
       </div>
     </motion.div>
-  );
-}
-
-// ─── Music Section ─────────────────────────────────────────────────────────────
-const SONG_TITLE = "Six Seven Dance";
-const SONG_ARTIST = "67";
-
-const LYRICS: { t: number; text: string }[] = [
-  { t: 0.04, text: "Still pulling up on them man" },
-  { t: 0.18, text: "Still skengdo, still lurking" },
-  { t: 0.30, text: "Man just do it and done it" },
-  { t: 0.42, text: "We don't do all that talking" },
-  { t: 0.55, text: "Anytime that they pop up" },
-  { t: 0.67, text: "We ain't stopping, we're working" },
-  { t: 0.78, text: "I don't care about nothing" },
-  { t: 0.90, text: "67 still lurking" },
-];
-
-function MusicSection() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
-  const smooth = useSpring(scrollYProgress, { stiffness: 100, damping: 30, mass: 0.4 });
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    return smooth.on("change", (v) => {
-      let idx = 0;
-      for (let i = 0; i < LYRICS.length; i++) { if (v >= LYRICS[i].t) idx = i; }
-      setActiveIndex(idx);
-    });
-  }, [smooth]);
-
-  const discRotate = useTransform(smooth, [0, 1], [0, 900]);
-  const discOpacity = useTransform(smooth, [0, 0.05], [0, 1]);
-  const discScale = useTransform(smooth, [0, 0.05], [0.7, 1]);
-  const introOpacity = useTransform(smooth, [0, 0.04], [0, 1]);
-  const glowOpacity = useTransform(smooth, [0, 0.3, 0.7, 1], [0, 0.5, 0.5, 0]);
-
-  return (
-    <div ref={sectionRef} className="relative bg-black" style={{ height: "420vh" }}>
-      <div className="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-black">
-        {/* Ambient glow under disc */}
-        <motion.div
-          style={{ opacity: glowOpacity, background: "radial-gradient(circle, rgba(210,138,149,0.35) 0%, transparent 70%)" }}
-          className="absolute w-80 h-80 rounded-full pointer-events-none"
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        <motion.p style={{ opacity: introOpacity }} className="absolute top-16 text-xs md:text-sm tracking-[0.35em] uppercase text-white/40 font-sans">
-          for you, always
-        </motion.p>
-
-        <motion.div
-          style={{ opacity: discOpacity, scale: discScale, rotate: discRotate }}
-          className="relative w-56 h-56 md:w-72 md:h-72 rounded-full mb-14 shrink-0"
-        >
-          <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,#1c1c1c_0%,#0a0a0a_60%,#000_100%)] shadow-[0_0_70px_rgba(255,255,255,0.08)]" />
-          {[0,1,2,3,4,5].map((i) => (
-            <div key={i} className="absolute rounded-full border border-white/5" style={{ inset: `${8 + i * 7}%` }} />
-          ))}
-          {/* Vinyl shimmer */}
-          <div className="absolute inset-0 rounded-full opacity-20" style={{ background: "conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.15) 10%, transparent 20%)" }} />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#d28a95] to-[#8c5560] flex items-center justify-center shadow-inner">
-              <span className="font-['Caveat'] text-white text-sm md:text-base">For Gala</span>
-            </div>
-          </div>
-        </motion.div>
-
-        <div className="relative text-center px-6 max-w-xl h-28 flex items-center justify-center">
-          {LYRICS.map((line, i) => (
-            <motion.p
-              key={i}
-              className="absolute font-serif font-bold text-xl md:text-3xl text-white/90"
-              animate={{ opacity: i === activeIndex ? 1 : 0, y: i === activeIndex ? 0 : 14 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-            >
-              {line.text}
-            </motion.p>
-          ))}
-        </div>
-
-        <motion.p style={{ opacity: discOpacity }} className="absolute bottom-10 text-xs tracking-[0.3em] uppercase text-white/40 font-sans">
-          "{SONG_TITLE}" — {SONG_ARTIST}
-        </motion.p>
-      </div>
-    </div>
   );
 }
 
