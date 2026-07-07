@@ -5,10 +5,6 @@ version = "1.0.0"
 id = "artifacts/gala-cherry-blossom"
 router = "path"
 
-[[integratedSkills]]
-name = "react-vite"
-version = "1.0.0"
-
 [[services]]
 name = "web"
 paths = [ "/" ]
@@ -19,8 +15,8 @@ run = "pnpm --filter @workspace/gala-cherry-blossom run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/gala-cherry-blossom", "run", "build" ]
-publicDir = "artifacts/gala-cherry-blossom/dist/public"
 serve = "static"
+publicDir = "artifacts/gala-cherry-blossom/dist/public"
 
 [[services.production.rewrites]]
 from = "/*"
